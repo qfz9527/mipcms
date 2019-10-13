@@ -6,7 +6,7 @@ use think\template\TagLib;
 class Miptag extends TagLib {
     
     protected $tags   =  [
-        'tagsategory'      => ['close' => 1], 
+        'tagscategory'      => ['close' => 1], 
         'tags'      => ['close' => 1],
      	'tagcomments'      => ['close' => 1],
         'tagcrumb' => ['close' => 0],
