@@ -1,14 +1,19 @@
-<!--文章-->
-<li class="li has-sub {if condition='$model=="article"'}active{/if}">
-    <a class="list-link with-sub"><i class="ion-ios-book-outline"></i> {$mipInfo['articleModelName']}
+<li class="li has-sub" :class='{"active":$route.params.mod  == "article"}'>
+    <a class="list-link with-sub"><i class="ion-ios-book-outline"></i> 文章
        <div class="list-icon"><i class="triangle-facing-left"></i><i class="triangle-facing-bottom"></i></div>
     </a>
     <ul class="sub-list">
-        <li class="{if condition='$action=="article"'}active{/if}"><a href="{$domain}/{$Think.config.admin}/article/article" >全部{$mipInfo['articleModelName']}</a></li>
-        {if condition='$mipInfo.superSites'}
-        <li class="{if condition='$action=="articlePush"'}active{/if}"><a href="{$domain}/{$Think.config.admin}/article/articlePush">SEO推送</a></li>
-        {/if}
-        <li class="{if condition='$action=="articleCategory"'}active{/if}"><a href="{$domain}/{$Think.config.admin}/article/articleCategory">分类管理</a></li>
-        <li class="{if condition='$action=="articleDiy"'}active{/if}"><a href="{$domain}/{$Think.config.admin}/article/articleDiy">自定义字段</a></li>
+        <li class="sub-item">
+            <router-link class="sub-link" :to='"/article/articleList/" + ($route.params.dataId && ($route.params.dataId != "undefined")  ? $route.params.dataId : "")'>全部文章</router-link>
+        </li>
+        <li class="sub-item">
+            <router-link class="sub-link" :to='"/article/articlePush/" + ($route.params.dataId && ($route.params.dataId != "undefined")  ? $route.params.dataId : "")'>SEO推送</router-link>
+        </li>
+        <li class="sub-item">
+            <router-link class="sub-link" :to='"/article/articleCategory/" + ($route.params.dataId && ($route.params.dataId != "undefined")  ? $route.params.dataId : "")'>分类管理</router-link>
+        </li>
+        <li class="sub-item">
+            <router-link class="sub-link" :to='"/article/articleDiy/" + ($route.params.dataId && ($route.params.dataId != "undefined")  ? $route.params.dataId : "")'>自定义字段</router-link>
+        </li>
     </ul>
 </li>

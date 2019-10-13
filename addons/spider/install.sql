@@ -1,4 +1,3 @@
-SET NAMES utf8;
 DROP TABLE IF EXISTS `mip_spiders`;
 CREATE TABLE `mip_spiders` (
   `uuid` char(24) NOT NULL,

@@ -1,15 +1,15 @@
-@color: #2796ea;
-@linkColor: #354052;
+$color: #2796ea;
+$linkColor: #354052;
 body {
     font-size: 13px;
     a {
-        color: @linkColor;
+        color: $linkColor;
         &:hover {
             color: #2796ea;
         }
     }
-}
-.mip-admin {
+}   
+.mip-admin { 
     background-color: #eef1f5;
     position: relative;
     .mip-header {
@@ -59,6 +59,9 @@ body {
                 &.active {
                     background-color: #228ee0;
                 }
+                &.router-link-exact-active {
+                    background-color: #228ee0;
+                }
                 &:hover {
                     background-color: #228ee0;
                 }
@@ -74,10 +77,9 @@ body {
         }
     }
     
-    //侧边栏菜单
     .mip-menu {
         width: 150px;
-        background-color: #222c3c;
+        background-color: #36384d;
         max-height: none !important;
         position: fixed;
         overflow: hidden; 
@@ -107,6 +109,7 @@ body {
                     padding-left: 0;
                     margin: 0;
                     &>.li {
+                        border-bottom: 1px solid #2c2d33;
                         a {
                             -webkit-transition: background .15s linear,color .15s linear;
                             -o-transition: background .15s linear,color .15s linear;
@@ -130,8 +133,7 @@ body {
                             }
                             
                             &:hover {
-                                background-color: #1d2531;
-                                color: #fff;
+//                              color: $color;
                             }
                             &>i {
                                 font-size: 15px;
@@ -140,8 +142,8 @@ body {
                         &.has-sub {
                                 &>a {
                                     &:hover {
-                                        background-color: #222c3c;
-                                        color: #fff;
+//                                      background-color: #36384d;
+//                              color: $color;
                                     }
                                 }
                         }
@@ -149,7 +151,7 @@ body {
                             &.has-sub {
                                 &>a {
                                     color: #b7c0cd;
-                                    background-color: #222c3c;
+                                    background-color: #36384d;
                                     box-shadow: none;
                                     &:hover {
                                         color: #fff;
@@ -174,20 +176,26 @@ body {
                             }
                         }
                         .sub-list {
-                            background-color: #1d2531;
+                            background-color: #252733;
                             list-style: none;
                             display: none;
-                            li {
-                                &>a {
-                                    padding-left: 30px;
-                                    position: relative;
-                                }
-                                &.active {
-                                     &>a {
-                                        box-shadow: inset 3px 0 0 0 #2796ea;
-                                        color: #2796ea;
-                                     }
-                                }
+                            a {
+                                padding-left: 30px;
+                                position: relative;
+                            }
+                            .sub-item a:hover{
+                                color: $color;
+                            }
+                            .router-link-exact-active {
+                                box-shadow: inset 3px 0 0 0 #2796ea;
+                                color: #2796ea;
+                            }
+                        }
+                        &.one-list {
+                            min-height: 38px;
+                            &>.router-link-exact-active{
+                                box-shadow: inset 3px 0 0 0 #2796ea!important;
+                                color: #2796ea!important;
                             }
                         }
                     }
@@ -222,7 +230,6 @@ body {
         transform: rotate(-45deg);  
    }
     
-    //主布局
     .mip-main {
          .mip-container {
             position: fixed;
@@ -272,8 +279,6 @@ body {
     }
     
 }
-//通用布局
-//选项卡
 .mip-box-tap {
     margin-bottom: 15px;
 }
@@ -294,19 +299,18 @@ body {
         }
         &:hover {
             a {
-                background-color: @color;
+                background-color: $color;
                 color: #fff;
             }
         }
         &.active {
             a {
-                background-color: @color;
+                background-color: $color;
                 color: #fff;
             }
         }
     }
 }
-/*盒子*/
 .mip-box {
     background-color: #fff;
     margin-bottom: 15px;
@@ -320,7 +324,7 @@ body {
         padding-right: 30px
     }
     .mip-box-heading {
-        color: @linkColor;
+        color: $linkColor;
         border-top-left-radius: 3px;
         border-top-right-radius: 3px;
         position: relative;
@@ -334,7 +338,7 @@ body {
             line-height: 16px;
             font-size: 16px;
             font-weight: 500;
-            color: @linkColor;
+            color: $linkColor;
         }
         .right {
             position: absolute;
@@ -348,7 +352,7 @@ body {
         .right:hover {
             border-radius: 3px;
             background-color: #eef1f5;
-            color: @linkColor;
+            color: $linkColor;
         }
     }
     .mip-box-body {
@@ -364,7 +368,6 @@ body {
         clear: both
     }
 }
-//自定义列表
 .content-list-header {
     margin-bottom: 10px;
 }
@@ -387,7 +390,7 @@ body {
     .diy-table-body {
         color: #7f8fa4;
         a {
-            color: @linkColor;
+            color: $linkColor;
             font-weight: 500;
         }
         &>.diy-table-item:nth-child(odd){
@@ -413,15 +416,6 @@ body {
         min-height: 40px;
         .handle {
             display: none;
-        }
-        .ivu-btn-text-up-down[disabled]:hover {
-            color: #cbcfd6;
-        }
-        .ivu-btn-text-up-down {
-            color: #cbcfd6;
-            &:hover {
-                color: #26344b;
-            }
         }
         &:hover {
             background-color: #eff3f6;
@@ -483,21 +477,21 @@ body {
                     display: block;
                     font-size: 0.8rem;
                     font-weight: 500;
-                    color: @linkColor;
+                    color: $linkColor;
                     overflow: hidden;
-                    white-space: nowrap;
+                    white-space: nowrap; 
                     text-overflow: ellipsis;
                     word-break: break-all;
                     text-decoration: none;
                     width: 100%;
                     transition: none;
                     &:hover{
-                        color: @color;
+                        color: $color;
                     }
                 }
                 &.active>a {
                     color: #fff;
-                    background-color: @color;
+                    background-color: $color;
                 }
                 .children {
                     li {
@@ -505,7 +499,7 @@ body {
                     }
                     li.active>a {
                         color: #fff;
-                        background-color: @color;
+                        background-color: $color;
                     }
                     a {
                         padding-left: 35px;
@@ -532,7 +526,7 @@ body {
                             margin-left: -5px;
                         }
                         &:hover {
-                            color: @color;
+                            color: $color;
                         }
                     }
                 }
@@ -562,19 +556,13 @@ body {
     }
 }
 
-//占位隐藏
 .v-h {
     visibility: hidden;
 }
 .v-s {
     visibility: inherit;
 }
-.ivu-page-item-active {
-    a:not([href]):not([tabindex]) {
-        color: #fff;
-        text-decoration: none;
-    }
-}
+
 label {
     margin-bottom: 0;
 }
@@ -633,4 +621,10 @@ label {
          background: #fff;
          padding: 10px;
     }
+}
+
+
+.header-group button .text {
+    display: inline-block;
+    vertical-align: middle;
 }

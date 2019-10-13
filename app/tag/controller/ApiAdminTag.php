@@ -1,191 +1,110 @@
 <?php
-//MIPCMS.Com [Don't forget the beginner's mind]
-//Copyright (c) 2017~2099 http://MIPCMS.Com All rights reserved.
+//MIPJZ.COM [Don't forget the beginner's mind]
+//Copyright (c) 2017~2099 http://MIPJZ.COM All rights reserved.
 namespace app\tag\controller;
 
-use mip\AdminBase;
+use app\common\controller\AdminBase;
+
 class ApiAdminTag extends AdminBase
 {
-     protected $beforeActionList = ['start'];
+    protected $beforeActionList = ['start'];
     public function start() {
-        $this->itemModelNameSpace = 'app\common\model\Tags';
-        $this->itemName = $this->mipInfo['tagModelName'];
-        $this->item = $this->tags;
-        $this->itemCategory = $this->tagsCategory;
+        $this->item = 'Tags';
         $this->itemType = 'tag';
-    }
-    public function index(){
-
-    }
-    public function tagAdd()
-    {
-        $cid = input('post.cid') ? input('post.cid') : 0;
-        $name = input('post.name');
-        $url_name = input('post.url_name');
-        $description = input('post.description');
-      	if(!$name){
-      	  return jsonError('请输入标签名');
-      	}
-        $tagInfo = db($this->tags)->where('name',$name)->find();
-      	if($tagInfo){
-      		return jsonError('标签已存在');
-      	}
-        $itemInfo = db($this->tags)->where('url_name',$url_name)->find();
-        if ($itemInfo) {
-          return jsonError('别名已存在，请重新输入');
-        }
-        db($this->tags)->insert(array(
-            'id' => uuid(),
-           'name' => $name,
-           'cid' => $cid,
-           'url_name' => $url_name,
-            'description' => $description,
-            'add_time' => time(),
-        ));
-        return jsonSuccess('添加成功');
-        
-
-    }
-    public function TagsAdd()
-    {
-        $tags = input('post.tags');
-      	if (!$tags) {
-      	  return jsonError('缺少参数');
-      	}
-        $tags = explode(',',$tags);
-      	if (is_array($tags)) {
-            foreach ($tags as $name) {
-                if ($name) {
-                    if (!$tagInfo=db($this->tags)->where('name',$name)->find()) {
-                        $tagInfo =  db($this->tags)->insert(array(
-                            'id' => uuid(),
-                            'name'=>$name,
-                            'add_time' => time(),
-                        ));
-                    }
-                }
-            }
-            return jsonSuccess('添加成功');
-        }else{
-        	return  jsonError('标签格式错误');
-        }
-
+        $this->itemName = '标签';
+        $this->itemContent = 'TagsContent';
+        $this->itemCategory = 'TagsCategory';
+        $this->itemModelNameSpace = 'app\tag\model\Tags';
+        $this->itemCategoryModelNameSpace = 'app\tag\model\TagsCategory';
+        $this->categoryListData = config('tagCategoryListData');
+        $this->categoryAllListData = config('tagCategoryListData');
     }
     
+    public function itemAdd()
+    {
+        $data = $this->request->post();
+        if (!isset($data['name']) || !$data['name']) {
+            return jsonError('请输入标题');
+        }
+        $itemInfo = db($this->item)->where('id',$data['id'])->find();
+        if ($itemInfo) {
+            return jsonError('标题已存在');
+        }
+        if (isset($data['url_name']) && $data['url_name']) {
+            $itemInfoByUrlName = db($this->item)->where('url_name',$data['url_name'])->find();
+            if ($itemInfoByUrlName) {
+                return jsonError('自定义的Url已存在');
+            }
+        }
+        $fieldList = input('post.fieldList');
+        $fieldList = json_decode($fieldList,true);
+        $res = model($this->itemModelNameSpace)->itemAdd($data,$fieldList);
+        if ($res) {
+            return jsonSuccess('操作成功');
+        } else {
+            return jsonError('操作失败');
+        }
+    }
+    
+    public function itemEdit()
+    {
+		$data = $this->request->post();
+        if (!isset($data['name']) || !$data['name']) {
+            return jsonError('请输入标题');
+        }
+        $itemInfo = db($this->item)->where('id',$data['id'])->find();
+        if (!$itemInfo) {
+            return jsonError('不存在');
+        }
+        $itemInfo = db($this->item)->where('id','<>',$data['id'])->where('name',$data['name'])->find();
+        if ($itemInfo) {
+            return jsonError('标题已存在');
+        }
+        if (isset($data['url_name']) && $data['url_name']) {
+            $itemInfoByUrlName = db($this->item)->where('id','<>',$data['id'])->where('url_name',$data['url_name'])->find();
+            if ($itemInfoByUrlName) {
+                return jsonError('自定义的Url已存在');
+            }
+        }
+        $fieldList = input('post.fieldList');
+        $fieldList = json_decode($fieldList,true);
+        $res = model($this->itemModelNameSpace)->itemEdit($data,$fieldList);
+        if ($res) {
+            return jsonSuccess('操作成功');
+        } else {
+            return jsonError('操作失败');
+        }
+    }
+	
     public function itemDel()
     {
         $id = input('post.id');
         if (!$id) {
           return jsonError('缺少参数');
         }
-        $itemInfo = db($this->tags)->where('id',$id)->find();
+        $itemInfo = db($this->item)->where('id',$id)->find();
         if (!$itemInfo) {
-          return jsonError('删除项不存在');
+            return jsonError('删除项不存在');
         }
-        db($this->tags)->where('id',$id)->delete();
-        return jsonSuccess('成功');
-    }
-    
-    public function TagsDel(){
-        $tagIds = input('post.tagIds');
-        if (!$tagIds) {
-      	  return jsonError('缺少参数');
-      	}
-        $tagIds = explode(',',$tagIds);
-      	if (is_array($tagIds)) {
-            foreach ($tagIds as $id){
-                $tagInfo = db($this->tags)->where('id',$id)->find();
-                if ($tagInfo) {
-                   db($this->tags)->where('id',$id)->delete();
-                }
-            }
-            return jsonSuccess('删除成功');
+        $res = model($this->itemModelNameSpace)->itemDel($id);
+        if ($res) {
+            return jsonSuccess('操作成功');
         } else {
-        	   return jsonError('参数错误');
+            return jsonError('操作失败');
         }
-
-    }
-    public function tagsSelect()
-    {
-      	$page = input('post.page');
-		$limit = input('post.limit');
-        $cid = input('post.cid');
-		$orderBy = input('post.orderBy');
-		$order = input('post.order');
-        $keywords = input('post.keywords');
-        $domain = input('post.domain');
-		if (!$page) {
-		  $page = 1;
-		}
-		if (!$limit) {
-		  $limit = 10;
-		}
-		if (!$orderBy) {
-		 $orderBy = 'id';
-		}
-		if (!$order) {
-			$order = 'desc';
-		}
-        $itemList = model($this->itemModelNameSpace)->getItemList($cid,$page,$limit,$orderBy,$order,'',$keywords);
-        $itemCount = model($this->itemModelNameSpace)->getCount($cid,'', $keywords);
-	    return jsonSuccess('',['tagsList' => $itemList,'total' => $itemCount,'page' => $page]);
     }
 
-    public function tagsEdit()
+    public function itemsDel()
     {
-		$id = input('post.id');
-		$name = input('post.name');
-        $cid = input('post.cid');
-        $url_name = input('post.url_name');
-        $description = input('post.description');
-        
-		if(!$id){
-			return jsonError('缺少ID');
-		}
-		if(!$name){
-			return jsonError('请输入名称');
-		}
-		if(!$TagsInfo = db($this->tags)->where('id',$id)->find()){
-          	return jsonError('标签不存在');
+        $ids = input('post.ids');
+        if (!$ids) {
+          return jsonError('缺少参数');
         }
-        $itemInfo = db($this->tags)->where('id','<>',$id)->where('name',$name)->find();
-        if ($itemInfo) {
-          return jsonError('名称已存在，请重新输入');
+        $ids = explode(',',$ids);
+        foreach ($ids as $id) {
+            model($this->itemModelNameSpace)->itemDel($id);
         }
-        if ($url_name) {
-            $itemInfo = db($this->tags)->where('id','<>',$id)->where('url_name',$url_name)->find();
-            if ($itemInfo) {
-              return jsonError('别名已存在，请重新输入');
-            }
-        }
-        if(db($this->tags)->where('id',$id)->update([
-           'name' => $name,
-           'url_name' => $url_name,
-           'description' => $description,
-           'cid' => $cid,
-           ])){
-        }
-        return  jsonSuccess('修改成功');
-    }
-
-
-    public function itemTagsSelectByItem()
-    {
-
-        $itemId = input('post.itemId');
-
-        if (!$itemId) {
-            return jsonError('缺少类型Id');
-        }
-
-        $tagsList = db($this->itemTags)->where('item_id',$itemId)->select();
-
-        if ($tagsList) {
-            foreach ($tagsList as $k => $v){
-                $tagsList[$k]['tags'] = db($this->tags)->where('id',$v['tags_id'])->find();
-            }
-        }
-        return jsonSuccess('',['tagsList' => $tagsList]);
+        return jsonSuccess('操作成功');
     }
     
     public function itemTransferAll()
@@ -208,195 +127,80 @@ class ApiAdminTag extends AdminBase
             return  jsonError('参数错误');
         }
     }
-    /*
-    * 分类模块
-    */
-   public function categoryAdd()
-   {
-        $pid = input('post.pid');
-        $name = input('post.name');
-        $url_name = input('post.url_name');
-        $seo_title = input('post.seo_title');
-        $template =  input('post.template');
-        $description = input('post.description');
-        $keywords = input('post.keywords');
-        if (!$pid) {
-            $pid = 0;
-        }
-        if (!$name) {
-          return jsonError('请输入名称');
-        }
-        if (!$url_name) {
-          return jsonError('请输入URL别名');
-        }
-
-        $itemCategoryInfo = db($this->itemCategory)->where('name',$name)->find();
-        if ($itemCategoryInfo) {
-            return jsonError('分类存在');
-        }
-        if (db($this->itemCategory)->insert(array(
-            'name' => $name,
-            'url_name' => $url_name,
-            'seo_title' => $seo_title,
-            'template' => $template,
-            'keywords' => $keywords,
-            'description' => $description,
-            'pid' => $pid
-        ))) {
-            return jsonSuccess('添加成功');
-        } else {
-            return  jsonError('添加失败');
-        }
-
-    }
-
-
-    public function categorySortSave()
-    {
-        $itemList = input('post.itemList/a');
-        if ($itemList) {
-            foreach ($itemList as $key => $val) {
-                if ($itemListInfo = db($this->itemCategory)->where('id',$val['id'])->find()) {
-                    db($this->itemCategory)->where('id',$val['id'])->update(array('sort' => $val['sort']));
-                }
-                if ($itemList[$key]['children']) {
-                    foreach ($itemList[$key]['children'] as $k => $v) {
-                        if (db($this->itemCategory)->where('id',$v['id'])->find()) {
-                            db($this->itemCategory)->where('id',$v['id'])->update(array('sort' => $v['sort']));
-                        }
-                    }
-                }
-            }
-            return jsonSuccess('保存成功');
-        }
-
-    }
-
-    public function categoryDel()
+    
+    public function itemFind()
     {
         $id = input('post.id');
         if (!$id) {
           return jsonError('缺少参数');
         }
-        if (db($this->itemCategory)->where('id',$id)->find()) {
-            db($this->itemCategory)->where('id',$id)->delete();
-            return jsonSuccess('删除成功');
-            } else {
-                return  jsonError('不存在');
+        $itemInfo = model($this->itemModelNameSpace)->getItemInfo(null,$id);
+        if (!$itemInfo) {
+          return jsonError('不存在');
         }
+        return jsonSuccess('',$itemInfo);
+    }
 
+    public function itemList()
+    {
+        $data = $this->request->post();
+        $itemList = model($this->itemModelNameSpace)->getItemList($data['cid'], $data['page'], $data['limit'], $data['orderBy'], $data['order'], null, $data['keywords']);
+        $itemCount = model($this->itemModelNameSpace)->getCount($data['cid'],null, $data['keywords']);
+        if ($data['domain']) {
+            if ($itemList) {
+                foreach ($itemList as $key => $val) {
+                    $itemList[$key]['url'] = model($this->itemModelNameSpace)->getUrlByItemInfo($val,$data['domain']);
+                }
+            }
+        }
+	    return jsonSuccess('',['itemList' => $itemList,'total' => $itemCount,'page' => $data['page']]);
     }
     
-    public function categoryList()
-    {
-        $pid = input('post.pid');
-        $page = input('post.page');
-        $limit = input('post.limit');
-        $orderBy = input('post.orderBy');
-        $order = input('post.order');
-        $pid = $pid ? $pid : 0;
-        if (!$page) {
-          $page = 1;
-        }
-        if (!$limit){
-          $limit = 1000;
-        }
-        if (!$orderBy) {
-           $orderBy = 'sort';
-        }
-        if (!$order) {
-            $order = 'asc';
-        }
-        $categoryList = model($this->itemModelNameSpace)->getCategory($pid,$orderBy,$order,$limit);
-        if ($categoryList) {
-            foreach ($categoryList as $key => $val) {
-                $categoryList[$key]['value'] = $val['id'];
-                $categoryList[$key]['label'] = $val['name'];
-                if ($categoryList[$key]['children']) {
-                    foreach ($categoryList[$key]['children'] as $k => $v) {
-                        $categoryList[$key]['children'][$k]['value'] = $v['id'];
-                        $categoryList[$key]['children'][$k]['label'] = $v['name'];
-                    }
-                }
-            }
-        } else {
-            $categoryList = array();
-        }
-        return jsonSuccess('',['categoryList' => $categoryList]);
-    }
- 
-    public function categoryEdit()
+    public function itemRecomment()
     {
         $id = input('post.id');
-        $pid = input('post.pid');
-        $name = input('post.name');
-        $url_name = input('post.url_name');
-        $seo_title = input('post.seo_title');
-        $template =  input('post.template');
-        $description = input('post.description');
-        $keywords = input('post.keywords');
-
-        if (!$id) {
-            return jsonError('缺少ID');
+        $itemInfo = db($this->item)->where('id',$id)->find();
+        if (!$itemInfo) {
+            return jsonError('不存在');
         }
-        if (!$url_name) {
-            return jsonError('缺少URL别名');
-        }
-        if (!$pid) {
-            $pid = 0;
-        }
-        if (!$name) {
-            return jsonError('请输入名称');
-        }
-
-        $categoryInfo = db($this->itemCategory)->where('id',$id)->find();
-        if(!$categoryInfo){
-            return jsonError('分类不存在');
-        }
-        
-        $itemInfo = db($this->itemCategory)->where('id','<>',$id)->where('name',$name)->find();
-        if ($itemInfo) {
-          return jsonError('标题已存在，请重新输入');
-        }
-        $itemInfo = db($this->itemCategory)->where('id','<>',$id)->where('url_name',$url_name)->find();
-        if ($itemInfo) {
-          return jsonError('别名已存在，请重新输入');
-        }
-        
-        if (db($this->itemCategory)->where('id',$id)->update([
-            'name' => $name,
-            'url_name' => $url_name,
-            'seo_title' => $seo_title,
-            'description' => $description,
-            'template' => $template,
-            'keywords' => $keywords,
-            'pid' => $pid
-        ])) {
-            return  jsonSuccess('修改成功');
+        if ($itemInfo['is_recommend'] == 1) {
+            $type = 0;
         } else {
-            return  jsonError('修改失败');
+            $type = 1;
         }
+        db($this->item)->where('id',$id)->update([
+            'is_recommend' => $type,
+        ]);
+        return  jsonSuccess('操作成功');
     }
-
-    public function getTemplate()
+    
+    public function push()
     {
-        $pages = [];
-        if (is_dir(ROOT_PATH . 'template' . DS . $this->mipInfo['template'] . DS . 'tag')) {
-            $templateFile = opendir(ROOT_PATH . 'template' . DS . $this->mipInfo['template'] . DS . 'tag');
-            if ($templateFile) {
-                while (false !== ($file = readdir($templateFile))) {
-                    if (substr($file, 0, 1) != '.' AND is_file(ROOT_PATH . 'template' . DS . $this->mipInfo['template'] . DS . 'tag' . DS . $file)) {
-                        $pages[] = $file;
-                    }
-                }
-                closedir($templateFile);
-            }
+        $postAddress = input('post.postAddress');
+        if (!$postAddress) {
+            return jsonError('请先去设置推送的接口');
         }
-        if ($pages) {
-            foreach ($pages as $key => $val) {
-                $pages[$key] = preg_replace("/.html/","",$val);
-            }
+        $urls = input('post.urls');
+        if (!$urls) {
+            return jsonError('没有检测到你推送的页面地址');
         }
-        return jsonSuccess('',$pages);
+        $urls = explode(',',$urls);
+        if (is_array($urls)) {
+            $api = $postAddress;
+            $ch = curl_init();
+            $options =  array(
+                CURLOPT_URL => $api,
+                CURLOPT_POST => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POSTFIELDS => implode("\n", $urls),
+                CURLOPT_HTTPHEADER => array('Content-Type: text/plain'),
+            );
+            curl_setopt_array($ch, $options);
+            $result = curl_exec($ch);
+            curl_close($ch);
+            return jsonSuccess($result);
+        } else {
+            return jsonError('数据格式错误');
+        }
     }
 }

@@ -59,7 +59,7 @@
         <?php } ?>
         	
       	<p class="jump">页面自动 <a id="href" href="<?php echo($url);?>">跳转</a> 等待时间： <b id="wait"><?php echo($wait);?></b></p>
-        <p class="bottom">Copyright &copy; Powered By <a href="http://www.mipcms.com" title="MIPCMS内容管理系统" target="_blank">MIPCMS内容管理系统</a></p>
+        <p class="bottom">Copyright &copy; Powered By <a href="http://www.ssycms.com" title="SSYCMS内容管理系统" target="_blank">SSYCMS内容管理系统</a></p>
     </div>
     <script type="text/javascript">
         (function(){

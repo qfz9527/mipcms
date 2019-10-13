@@ -1,6 +1,6 @@
 <?php
-use mip\ChinesePinyin;
-use mip\Mip;
+use think\Response;
+use app\common\lib\ChinesePinyin;
     function compress_html($higrid_uncompress_html_source) {
         $chunks = preg_split( '/(<pre.*?\/pre>)/ms', $higrid_uncompress_html_source, -1, PREG_SPLIT_DELIM_CAPTURE );
         $higrid_uncompress_html_source = '';
@@ -41,18 +41,55 @@ use mip\Mip;
         $charid = strtolower(md5(uniqid(rand(), true)));
         return substr($charid,0,24);
     }
+    function unid() {
+        $charid = strtolower(md5(uniqid(rand(), true)));
+        return $charid;
+    }
     function jsonError($message = '',$url=null) {
         $return['msg'] = $message;
         $return['code'] = -1;
         $return['url'] = $url;
-        return json($return, 200);
+        $res = json_encode($return,true);
+        return Response::create($res)->contentType('text/json');;
+        
     }
     function jsonSuccess($message = '',$data = '',$url=null) {
         $return['msg']  = $message;
         $return['data'] = $data;
         $return['code'] = 1;
         $return['url'] = $url;
-        return json($return, 200);
+        $res = json_encode($return,true);
+        return Response::create($res)->contentType('text/json');;
+    }
+    
+    function arrayError ($message = '', $data = '', $url = '') {
+        $return['msg'] = $message;
+        $return['code'] = -1;
+        $return['url'] = $url;
+        return $return;
+    }
+    function arraySuccess ($message = '', $data = '', $url = '') {
+        $return['msg']  = $message;
+        $return['data'] = $data;
+        $return['code'] = 1;
+        $return['url'] = $url;
+        return $return;
+    }
+    
+    function fetch_dir($dir, $file_type = null) {
+        $base_dir = realpath($dir);
+        if (!file_exists($base_dir)) {
+            return false;
+        }
+        $dir_handle = opendir($base_dir);
+        $files_list = array();
+        while (($file = readdir($dir_handle)) !== false) {
+            if (substr($file, 0, 1) != '.' AND is_dir($base_dir . DS . $file)) {
+                $files_list[] = $base_dir . DS . $file;
+            }
+        }
+        closedir($dir_handle);
+        return $files_list;
     }
     
     function fetch_file_lists($dir, $file_type = null) {
@@ -84,6 +121,7 @@ use mip\Mip;
                 }
             }
         }
+        closedir($dir_handle);
         return $files_list;
     }
     
@@ -137,14 +175,14 @@ use mip\Mip;
     }
     
     function getAvatarUrl($uid) {
-        if (MIP_HOST) {
-            if (file_exists(ROOT_PATH . 'uploads'. DS .'avatar' . DS . $uid . '.jpg')) {
-                return '/uploads/avatar/' . $uid .'.jpg';
+        if (SITE_HOST) {
+            if (file_exists(ROOT_PATH . 'public'. DS .'uploads'. DS .'avatar' . DS . $uid . '.jpg')) {
+                return '/public/uploads/avatar/' . $uid .'.jpg';
             } else {
                 return '/public/assets/common/images/avatar.jpg';
             }
         } else {
-            if (file_exists(ROOT_PATH .'public'. DS . 'uploads'. DS .'avatar' . DS . $uid . '.jpg')) {
+            if (file_exists(ROOT_PATH . 'uploads'. DS .'avatar' . DS . $uid . '.jpg')) {
                 return '/uploads/avatar/' . $uid .'.jpg';
             } else {
                 return '/assets/common/images/avatar.jpg';
@@ -239,6 +277,7 @@ use mip\Mip;
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $api);
             curl_setopt($ch, CURLOPT_HEADER, 0);
+			 curl_setopt($ch, CURLOPT_TIMEOUT, 20); 
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -250,6 +289,7 @@ use mip\Mip;
             curl_setopt($ch, CURLOPT_URL, $api);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 20); 
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -335,7 +375,7 @@ use mip\Mip;
             @preg_match("/height=[\'|\"](.*?)[\'|\"]/",$val,$tempHeight);
             $src = $imagesArray[1][$key];
             if ($tempWidth && $tempHeight) {
-                if ($tempWidth > 500) {
+                if ($tempWidth[1] > 500) {
                     $layout = '';
                     $tempImg = '<mip-img '.$layout.' alt="'.$alt.'" src="'.$src.'" popup></mip-img>';
                 } else {
@@ -396,62 +436,13 @@ use mip\Mip;
     if (strpos($content, '{MIPCMSCSS}') !== false) {
        
         $cssContent = [];
-//      $cssData = array(
-//          'fontSize' => 'font-size',
-//          'margin' => 'margin',
-//          'mLeft' => 'margin-left',
-//          'mRight' => 'margin-right',
-//          'mTop' => 'margin-top',
-//          'mBottom' => 'margin-bottom',
-//          'padding' => 'padding',
-//          'pLeft' => 'padding-left',
-//          'pRight' => 'padding-right',
-//          'pTop' => 'padding-top',
-//          'pBottom' => 'padding-bottom',
-//          'color' => 'color',
-//          'bgColor' => 'background',
-//          'width' => 'width',
-//          'maxWidth' => 'max-width',
-//          'minWidth' => 'min-width',
-//          'height' => 'height',
-//          'position' => 'position',
-//          'top' => 'top',
-//          'left' => 'left',
-//          'right' => 'right',
-//          'bottom' => 'bottom',
-//          'border' => 'border',
-//          'bRadius' => 'border-radius',
-//          'display' => 'display',
-//          'float' => 'float',
-//          'overflow' => 'overflow',
-//          'whiteSpace' => 'white-space'
-//      );
-//      preg_match_all("/class=.+?['|\"]/i", $content, $contentClassArray);
-//      if ($contentClassArray) {
-//          foreach ($contentClassArray[0] as $key => $value) {
-//              preg_match_all('/{(.*?)}/', $value, $contentArray);
-//              foreach ($contentArray[1] as $k => $v) {
-//                  foreach ($cssData as $subK => $subV) {
-//                      $className = $contentArray[1][$k];
-//                      if (strpos($className, $subK) !== false) {
-//                          $resCalssName = str_replace('%', '', $className);
-//                          $resCalssName = str_replace('#', '', $resCalssName);
-//                          if (!isset($cssContent['.'.$resCalssName])) {
-//                              $cssContent['.'.$resCalssName] = $subV . ':'.str_replace($subK, '', $className).'!important;';
-//                          }
-//                          $content = str_replace($contentArray[0][$k], $resCalssName, $content);
-//                      }
-//                  }
-//              }
-//          }
-//      }
         $tempCssContent = '';
         if ($cssContent) {
             foreach ($cssContent as $key => $value) {
                 $tempCssContent .= $key . '{' . $value . '}';
             }
         }
-        preg_match_all("/<[a-z]{1,}\s+.*?>/", $content, $contentHtmlArray);
+        preg_match_all("/<[a-zA-Z0-9]{1,}\s+.*?>/", $content, $contentHtmlArray);
         if ($contentHtmlArray) {
             foreach ($contentHtmlArray[0] as $key => $value) {
             	   if (strpos($value, 'style=') !== false) {
@@ -614,10 +605,11 @@ function format_url($srcurl, $baseurl) {
   }  
   $baseinfo = parse_url($baseurl);  
   $url = $baseinfo['scheme'].'://'.$baseinfo['host'];  
+  
   if(substr($srcinfo['path'], 0, 1) == '/') {  
     $path = $srcinfo['path'];  
   }else{  
-    $path = dirname($baseinfo['path']).'/'.$srcinfo['path'];  
+    $path = $baseinfo['path'].'/'.$srcinfo['path'];  
   }  
   $rst = array();  
   $path_array = explode('/', $path);  
@@ -698,7 +690,6 @@ function format_url($srcurl, $baseurl) {
         $html = str_replace('charset=gbk','charset=UTF-8',$html);
         $html = str_replace('charset="gbk"','charset="UTF-8"',$html);
         $html = str_replace("charset='gbk'","charset='UTF-8'",$html);
-        $html = str_replace("charset=UTF-8","",$html);
         return $html;
     }
     
@@ -711,10 +702,9 @@ function getImage($url,$save_dir,$filename = '',$type=0) {
          return false;
     }
     $ext = strrchr($url,'.');
-    if($ext != '.gif' || $ext!='.jpg' ||  $ext!='.png' || $ext!='.jpeg'){
+    if ($ext != '.gif' && $ext != '.jpg' &&  $ext != '.png' && $ext != '.jpeg') {
         $ext = '.jpg';
     }
-     
     $filename = uuid() . $ext;
     if (0 !== strrpos($save_dir, DS )){
         $save_dir.= DS;
@@ -724,28 +714,23 @@ function getImage($url,$save_dir,$filename = '',$type=0) {
     }
     if ($type) {  
         $ch = curl_init();  
-        $timeout = 5;  
+        $timeout = 30;  
         curl_setopt($ch, CURLOPT_URL, $url);  
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);  
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);  
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         $content = curl_exec($ch);  
         curl_close($ch);  
     } else {  
-//      ob_start();  
-//      readfile($url);  
-//      $content = ob_get_contents();  
-//      ob_end_clean();  
-        $ch = curl_init();  
-        $timeout = 5;  
-        curl_setopt($ch, CURLOPT_URL, $url);  
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);  
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);  
-        $content = curl_exec($ch);  
-        curl_close($ch);  
+        ob_start();  
+        readfile($url);  
+        $content = ob_get_contents();  
+        ob_end_clean();
     }  
-    //echo $content;  
-    $size = strlen($content);  
-    //文件大小  
+   
     $fp2 = @fopen($save_dir . $filename, 'a');  
     fwrite($fp2, $content);  
     fclose($fp2);  
@@ -754,10 +739,30 @@ function getImage($url,$save_dir,$filename = '',$type=0) {
     return array('file_name'=>$filename,'save_path'=>$save_dir.$filename,'error'=>0);
 }
    
-    if (is_file(APP_PATH . 'function.php')) {
-        include APP_PATH . 'function.php';
+    $template = APP_PATH;
+    if (is_dir($template)) {
+        $templateFile = opendir($template);
+        if ($templateFile) {
+            while (false !== ($file = readdir($templateFile))) {
+                if (substr($file, 0, 1) != '.' AND strpos($file, 'function.php') !== false || strpos($file, 'Function.php')) {
+                     include $file;
+                }
+            }
+            closedir($templateFile);
+        }
     }
     
+    foreach (fetch_dir(ROOT_PATH . 'addons' . DS) as $key => $dir) {
+        if (is_file($dir . DS . 'function.php')) {
+            require $dir . DS . 'function.php';
+        }
+    }
+    foreach (fetch_dir(ROOT_PATH . 'app' . DS) as $key => $dir) {
+        if (is_file($dir . DS . 'function.php')) {
+            require $dir . DS . 'function.php';
+        }
+    }
+     
     
     function getPinyin($name) {
         if (!$name) {
@@ -767,3 +772,56 @@ function getImage($url,$save_dir,$filename = '',$type=0) {
         $result = $Pinyin->TransformWithoutTone($name);
         return $result;
     }
+
+	function toHex($N) {
+	    if ($N==NULL) return "00";
+	    if ($N==0) return "00";
+	    $N=max(0,$N); 
+	    $N=min($N,255); 
+	    $N=round($N);
+	    $string = "0123456789ABCDEF";
+	    $val = (($N-$N%16)/16);
+	    $s1 = $string{$val};
+	    $val = ($N%16);
+	    $s2 = $string{$val};
+	    return $s1.$s2;
+	}
+	//颜色值转换为16进制数字
+	function rgb2hex($r,$g,$b){
+	    return toHex($r).toHex($g).toHex($b);
+	}
+	//16进制数字转换为颜色值
+	function hex2rgb($N){
+	    $dou = str_split($N,2);
+	    return array(
+	        "R" => hexdec($dou[0]), 
+	        "G" => hexdec($dou[1]), 
+	        "B" => hexdec($dou[2])
+	    );
+	}
+	    
+	function getImagetype($filename) {
+	 $file = fopen($filename, 'rb');
+	 $bin = fread($file, 2);
+	 fclose($file);
+	 $strInfo = @unpack('C2chars', $bin);
+	 $typeCode = intval($strInfo['chars1'] . $strInfo['chars2']);
+	 $fileType = '';
+	 switch ($typeCode) {
+	  case 255216:
+	   $fileType = 'jpg';
+	   break;
+	  case 7173:
+	   $fileType = 'gif';
+	   break;
+	  case 6677:
+	   $fileType = 'bmp';
+	   break;
+	  case 13780:
+	   $fileType = 'png';
+	   break;
+	  default:
+	   $fileType = '只能上传图片类型格式';
+	 }
+	 return $fileType;
+	}

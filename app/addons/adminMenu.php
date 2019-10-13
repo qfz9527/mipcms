@@ -1,5 +1,4 @@
-<?php
-return [
-    'key' => 5,
-    'path' => './app/addons/adminMenu.html',
-];
+<?php    return [
+        'key' => 98,
+        'path' => './app/addons/adminMenu.html',        'routes' => './app/addons/adminRoutes.routes',
+    ];

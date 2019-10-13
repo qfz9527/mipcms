@@ -1,6 +1,6 @@
 <?php
-//MIPCMS.Com [Don't forget the beginner's mind]
-//Copyright (c) 2017~2099 http://MIPCMS.Com All rights reserved.
+//MIPJZ.Com [Don't forget the beginner's mind]
+//Copyright (c) 2017~2099 http://MIPJZ.Com All rights reserved.
 namespace app\install\controller;
 use think\Controller;
 use think\Request;
@@ -149,7 +149,7 @@ class Install extends Controller
                 $dbconfig['database'] = $dbname;
                 $dbconfig['prefix']=trim(input('dbprefix'));
                 $tablepre = input("dbprefix");
-                $sql = file_get_contents(PUBLIC_PATH.'package'.DS.'mipcms_v_3_6_0.sql');
+                $sql = file_get_contents(PUBLIC_PATH.'package'.DS.'mipcms_v_5_0_0.sql');
                 $sql = str_replace("\r", "\n", $sql);
                 $sql = explode(";\n", $sql);
                 $default_tablepre = "mip_";
@@ -235,6 +235,7 @@ class Install extends Controller
                     }
                     try {
                         touch(PUBLIC_PATH.'install'.DS.'install.lock');
+                        file_put_contents(PUBLIC_PATH.'install'.DS.'install.lock', '');
                     } catch (Exception $e) {
                         return jsonError('install.lock文件写入失败，请检查public/install 文件夹是否可写入');
                     }

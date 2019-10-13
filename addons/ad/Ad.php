@@ -2,7 +2,6 @@
 namespace addons\ad;
 
 use think\Addons;
-use mip\Init;
 class Ad extends Addons
 {
     public $info = [

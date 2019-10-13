@@ -1,23 +1,48 @@
 <?php
-//MIPCMS.Com [Don't forget the beginner's mind]
-//Copyright (c) 2017~2099 http://MIPCMS.Com All rights reserved.
+//MIPJZ.COM [Don't forget the beginner's mind]
+//Copyright (c) 2017~2099 http://MIPJZ.COM All rights reserved.
 namespace app\index\controller;
 use think\Request;
 use think\Response;
-use mip\Mip;
-class Index extends Mip
+use think\Cache;
+use app\common\controller\Base;
+
+class Index extends Base
 {
     public function index()
     {
         if ($this->domainSettingsInfo && $this->domainSettingsInfo['diySiteName']) {
             $this->assign('mipTitle',$this->domainSettingsInfo['diySiteName']);
         } else {
-            $this->assign('mipTitle',$this->mipInfo['siteName'].$this->mipInfo['indexTitle']);
+            $this->assign('mipTitle',$this->siteInfo['siteName'].$this->siteInfo['indexTitle']);
         }
-      
-        return $this->mipView('index/index');
+        
+        $jsonFile = config('template.view_path') . 'index/index.json';
+        if (is_file($jsonFile)) {
+            $jsonData = file_get_contents($jsonFile);
+            $siteBlockListData = json_decode($jsonData,true);
+            if ($siteBlockListData) {
+                foreach ($siteBlockListData as $key => $value) {
+                    $this->assign($key,$value);
+                }
+            }
+        }
+        
+        $index = $this->siteView('index/index');
+        return $index;
     }
-
+    
+    
+    public function link()
+    {
+        $mipTitle = '站内链接' . $this->siteInfo['titleSeparator'] . $this->siteInfo['siteName'];
+        $this->assign('mipTitle', $mipTitle);
+        return $this->siteView('index/link');
+    }
+    
+    
+    
+    
    function sitemap() {
         $count = model('app\article\model\Articles')->getCount(0);
         $tagsCount = db('Tags')->count();
@@ -38,13 +63,13 @@ class Index extends Mip
         $sitemap .= '</sitemap>';
         }
         $sitemap .= '</sitemapindex>';
-        return Response::create($sitemap)->contentType('text/xml');;
+        return Response::create($sitemap)->contentType('text/xml');
     }
     
     function xml() {
         $page = input('param.id');
         $page = $page ? $page : 1;
-        $itemList = model('app\article\model\Articles')->getItemPushList('', $page, 200, 'publish_time', 'desc');
+        $itemList = model('app\article\model\Articles')->getItemList('', $page, 200, 'publish_time', 'desc');
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>';
         $xml .= '<urlset>';
@@ -55,7 +80,7 @@ class Index extends Mip
             $xml .= '<changefreq>daily</changefreq>';
             $xml .= '<priority>1.0</priority>';
             $xml .= '</url>';
-            if ($this->itemCategoryList = model('app\article\model\Articles')->getCategory()) {
+            if ($this->itemCategoryList = model('app\article\model\ArticlesCategory')->getCategory()) {
                 foreach($this->itemCategoryList as $k => $v) {
                     $xml .= '<url>';
                     $xml .= '<loc>' . $v["url"] . '</loc>';
@@ -84,14 +109,10 @@ class Index extends Mip
         $page = $page ? $page : 1;
         $xml = '<?xml version="1.0" encoding="utf-8"?>';
         $xml .= '<urlset>';
-        $tagsList = db($this->tags)->page($page,200)->select();
+        $tagsList = db('Tags')->page($page,200)->select();
         if ($tagsList) {
             foreach ($tagsList as $key => $val) {
-                if ($val['url_name']) {
-                    $tagsList[$key]['url'] = $this->domain . '/' . $this->mipInfo['tagModelUrl'] .'/' . $val['url_name'] . '/';
-                } else {
-                    $tagsList[$key]['url'] = $this->domain . '/' . $this->mipInfo['tagModelUrl'] .'/' . $val['id'] . '/';
-                }
+                $tagsList[$key]['url'] = model('app\tag\model\Tags')->getUrlByItemInfo($val);
                 $tagsList[$key]['time'] = $val['add_time'] ? date("Y-m-d", $val["add_time"]) : date("Y-m-d");
             }
             foreach ($tagsList as $key => $val) {
@@ -124,7 +145,7 @@ class Index extends Mip
     function pcXml() {
         $page = input('param.id');
         $page = $page ? $page : 1;
-        $itemList = model('app\article\model\Articles')->getItemPushList('', $page, 200, 'publish_time', 'desc');
+        $itemList = model('app\article\model\Articles')->getItemList('', $page, 200, 'publish_time', 'desc');
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>';
         $xml .= '<urlset>';
@@ -144,6 +165,5 @@ class Index extends Mip
         $xml .= '</urlset>';
         return Response::create($xml)->contentType('text/xml');;
     }
-    
     
 }

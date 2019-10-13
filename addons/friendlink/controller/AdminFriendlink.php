@@ -1,10 +1,10 @@
 <?php
-//MIPCMS.Com [Don't forget the beginner's mind]
-//Copyright (c) 2017~2099 http://MIPCMS.Com All rights reserved.
+//MIPJZ.Com [Don't forget the beginner's mind]
+//Copyright (c) 2017~2099 http://MIPJZ.Com All rights reserved.
 namespace addons\friendlink\controller;
 
-use mip\Init;
-class AdminFriendlink extends Init
+use app\common\controller\AdminBase;
+class AdminFriendlink extends AdminBase
 {
     protected $beforeActionList = ['start'];
     protected $addonsName = '';

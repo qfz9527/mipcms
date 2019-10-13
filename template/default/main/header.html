@@ -1,33 +1,29 @@
 <div class="mipmb-header mipmb-header-default" id="mip_header">
-    <div class="container d-lg-flex justify-content-between">
-        <div class="d-lg-flex justify-content-start">
+    <div class="container">
+        <div class="menu-warp">
             <div class="logo-text">
                 <a data-type="mip" href="{$domain}" data-title="{$mipInfo['siteName']}">{$mipInfo['siteName']}</a>
             </div>
-            <ul class="mipmb-menu list-unstyled d-lg-flex">
-                <li class='{if condition="$mod=='index'"}active{/if}'>
-                    <a href="{$domain}" data-type="mip" data-title="{$mipInfo['siteName']}" title='首页'>首页</a>
+            <ul class="mipmb-menu list-unstyled">
+                <li class='nav-item {if condition="$mod=='index'"}active{/if}'>
+                    <a href="{$domain}" data-type="mip" data-title="{$siteInfo['siteName']}" title='首页'>首页</a>
                 </li>
-                {mipcms:articlecategory value="v" type='menu'}
-                <li class='mipmb-dropdown-item {if condition="$categoryUrlName==$v['url_name']"}active{/if}'>
-                    <a href="{$v.url}" data-type="mip" data-title="{$v['name']}" title="{$v['name']}">{$v['name']}</a>
-                    {if condition='$v.sub'}
-                    <ul class="mipmb-dropdown-list">
-                        {volist name='$v.sub' id="val"}
-                        <li>
-                            <a href="{$val.url}" data-type="mip" data-title="{$val.name}" title='{$val.name}'>{$val.name}</a>
-                        </li>
-                        {/volist}
-                    </ul>
-                    {/if}
+                {mipjz:widgetnav value='v'}
+                <li class="nav-item">
+                    <a {if condition='$v["target"]'}target="_blank"{/if} href="{$v.url}">{$v.name}</a>
                 </li>
-                {/mipcms:articlecategory}
-                <li>
-                    <a href="http://zhannei.baidu.com/cse/search?s={$mipInfo['biaduZn']}" target="_blank" title='搜索'>搜索</a>
-                </li>
+                {/mipjz:widgetnav}
             </ul>
+            <div class="d-none d-lg-block header-search-warp">
+                <mip-form class='form-inline search-form' width='350' url="{$domain}/search" method="get">
+                    <div class="d-inline-block pull-left">
+                        <input class="form-control" type="text" name="q">
+                    </div>
+                    <input type="submit" class="d-inline btn btn-primary" value="搜索">
+                </mip-form>
+            </div>
         </div>
-        <div class="d-none d-lg-flex">
+        <div class="d-none d-lg-block float-right">
             <ul class="mipmb-menu list-unstyled">
                 {if condition='$userInfo["group_id"] == 1'}
                 <li>

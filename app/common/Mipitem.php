@@ -1,9 +1,8 @@
 <?php
-//MIPCMS.Com [Don't forget the beginner's mind]
-//Copyright (c) 2017~2099 http://MIPCMS.Com All rights reserved.
+//MIPJZ.COM [Don't forget the beginner's mind]
+//Copyright (c) 2017~2099 http://MIPJZ.COM All rights reserved.
 namespace app\common;
 use think\template\TagLib;
-use mip\Paginationm;
 class Mipitem extends TagLib {
     
     protected $tags   =  [

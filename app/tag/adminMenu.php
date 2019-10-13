@@ -1,5 +1,6 @@
 <?php
 return [
-    'key' => 3,
+    'key' => 5,
     'path' => './app/tag/adminMenu.html',
+    'routes' => './app/tag/adminRoutes.routes',
 ];

@@ -1,9 +1,9 @@
 <?php
-//MIPCMS.Com [Don't forget the beginner's mind]
-//Copyright (c) 2017~2099 http://MIPCMS.Com All rights reserved.
+//MIPJZ.Com [Don't forget the beginner's mind]
+//Copyright (c) 2017~2099 http://MIPJZ.Com All rights reserved.
 namespace app\article\controller;
 use think\Db;
-use mip\AdminBase;
+use app\common\controller\AdminBase;
 class ApiAdminArticleDiy extends AdminBase
 {
     protected $beforeActionList = ['start'];
@@ -103,11 +103,11 @@ class ApiAdminArticleDiy extends AdminBase
         } catch(\Exception $e) {
            return jsonError('添加失败');
         }
-        db($this->currentTable . 'Table')->insert(array(
-            'id' => uuid(),
-            'name' => $fieldTitle,
-            'value' => $field,
-            'type' => $fieldType,
+        db($this->currentTable . 'Table')->insert(array(
+            'id' => uuid(),
+            'name' => $fieldTitle,
+            'value' => $field,
+            'type' => $fieldType,
         ));
         return jsonSuccess('添加成功');
     }

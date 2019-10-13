@@ -1,34 +1,49 @@
 <?php
-//MIPCMS.Com [Don't forget the beginner's mind]
-//Copyright (c) 2017~2099 http://MIPCMS.Com All rights reserved.
+//MIPJZ.COM [Don't forget the beginner's mind]
+//Copyright (c) 2017~2099 http://MIPJZ.COM All rights reserved.
 namespace app\article\controller;
-use mip\Cutpagem;
-use mip\Mip;
-class ArticleDetail extends Mip
+use app\common\controller\Base;
+
+class ArticleDetail extends Base
 {
+    protected $beforeActionList = ['start'];
+    public function start() {
+        $this->item = 'Articles';
+        $this->itemType = 'article';
+        $this->itemName = '文章';
+        $this->itemContent = 'ArticlesContent';
+        $this->itemCategory = 'ArticlesCategory';
+        $this->itemModelNameSpace = 'app\article\model\Articles';
+        $this->itemCategoryModelNameSpace = 'app\article\model\ArticlesCategory';
+        $this->categoryListData = config('articleCategoryListData');
+        $this->categoryAllListData = config('articleCategoryListData');
+    }
     public function index()
     {
         $id = input('param.id');
         $page = input('param.page');
-        $whereId = $this->mipInfo['idStatus'] ? 'uuid' : 'id';
-        $itemInfo = db($this->articles)->where($whereId,$id)->find();
+        if ($this->siteInfo['idStatus']) {
+            $itemInfo = model($this->itemModelNameSpace)->getItemInfo(null,$id);
+        } else {
+            $itemInfo = model($this->itemModelNameSpace)->getItemInfo($id);
+        }
         if (!$itemInfo) {
-            if ($this->mipInfo['diyUrlStatus']) {
-                $itemInfo = db($this->articles)->where('url_name',$id)->find();
+            if ($this->siteInfo['diyUrlStatus']) {
+                $itemInfo = db($this->item)->where('url_name',$id)->find();
                 if (!$itemInfo) {
-                    return $this->error($this->mipInfo['articleModelName'].'不存在','');
+                    return $this->error('访问的内容不存在','');
                 }
             }
         }
         if (!$itemInfo) {
-            return $this->error($this->mipInfo['articleModelName'].'不存在','');
+            return $this->error('访问的内容不存在','');
         }
-        $itemInfo = model('app\article\model\Articles')->getItemInfo($itemInfo['id']);
+        $itemInfo = model($this->itemModelNameSpace)->getItemInfo($itemInfo['id']);
         //当前所属分类别名
         $this->assign('categoryUrlName',$itemInfo['categoryInfo']['url_name']);
         
         //更新当前页面浏览次数
-        model('app\article\model\Articles')->updateViews($itemInfo['id'], $itemInfo['uid']);
+        model($this->itemModelNameSpace)->updateViews($itemInfo['id'], $itemInfo['uid']);
         
         //详情页面ID
         $this->assign('itemDetailId',$itemInfo['uuid']);
@@ -36,29 +51,25 @@ class ArticleDetail extends Mip
         $this->assign('page',$page ? $page : 1);
         
         $this->assign('cid',$itemInfo['categoryInfo']['id']);
-        
-        //标签列表
-        $itemTagsList = model('app\common\model\Tags')->getTagsListByItemType('article',$itemInfo['uuid']);
-        $this->assign('tags',$itemTagsList);
-        
-        //标签列表字符串
-        $itemInfo['tagsListString'] = '';
-        if ($itemTagsList) {
-             foreach ($itemTagsList as $k => $v) {
-                $tempTagsName[] = $v['tags']['name'];
-            }
-            $tagsListString = implode(',',$tempTagsName);
-            $itemInfo['tagsListString'] = $tagsListString;
-        }
-        
+         
         //标题
-        $mipTitle = $itemInfo['title'] . $this->mipInfo['titleSeparator'] . $this->mipInfo['siteName'];
+        $mipTitle = $itemInfo['title'] . $this->siteInfo['titleSeparator'] . $this->siteInfo['siteName'];
         $this->assign('mipTitle', $mipTitle);
      
         //关键词
-        if (@$itemInfo['keywords']) {
+        if ($itemInfo['keywords']) {
             $mipKeywords = $itemInfo['keywords'];
         } else {
+	        $itemTagsList = model('app.tag.model.Tags')->getItemList( null, 1, 20, 'add_time', 'desc', $where = null, null, null,$itemInfo['uuid'], null, null);
+	        $this->assign('tags',$itemTagsList);
+	        $itemInfo['tagsListString'] = '';
+	        if ($itemTagsList) {
+	          	foreach ($itemTagsList as $k => $v) {
+	                $tempTagsName[] = $v['name'];
+	            }
+	            $tagsListString = implode(',',$tempTagsName);
+	            $itemInfo['tagsListString'] = $tagsListString;
+	        }
             $mipKeywords = $itemInfo['tagsListString'];
         }
         $this->assign('mipKeywords',$mipKeywords);
@@ -74,10 +85,22 @@ class ArticleDetail extends Mip
         
         $this->assign('itemInfo',$itemInfo);
         
-        $templateName = $itemInfo['categoryInfo']['detail_template'] ? $itemInfo['categoryInfo']['detail_template'] : 'articleDetail';
+        $templateName = $itemInfo['categoryInfo']['detail_template'] ? $itemInfo['categoryInfo']['detail_template'] : $this->itemType . 'Detail';
         $templateName = str_replace('.html', '', $templateName);
         
-        return $this->mipView('article/'.$templateName);
+        //兼容老版本
+        $itemTagsList = model('app.tag.model.Tags')->getItemList('',1,10,'add_time','asc','','','',$itemInfo['uuid']);
+        if ($itemTagsList) {
+            foreach ($itemTagsList as $key => $value) {
+                if ($value) {
+                   $itemTagsList[$key]['tags']['name'] = $value['name'];
+                }
+            }
+        }
+        $this->assign('tags',$itemTagsList);
+        
+        
+        return $this->mipView($this->itemType . '/'.$templateName);
     }
 
 

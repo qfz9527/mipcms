@@ -18,27 +18,34 @@ a {
     }
 }
 
-//导航
+
 .mipmb-header-default {
     background-color: #303641;
+    .menu-warp {
+        float: left;
+    }
     .logo-text {
         margin-right: 15px;
         font-size: 20px;
-        line-height: 60px;
+        display: inline;
         a {
             color: #fff;
         }
     }
-    //菜单
+    .header-search-warp {
+        display: inline-block!important;
+    }
     .mipmb-menu {
         background-color: #303641;
         line-height: 0;
         padding: 0;
-        margin: 0;
+        margin: 0;    
+        display: inline;
         &>li {
             margin-left: 1px;
             margin-right: 1px;
             position: relative;
+            display: inline-block;
             &>a {
                 display: block;
                 position: relative;
@@ -64,7 +71,7 @@ a {
             }
         }
     }
-    //下拉二级菜单
+    
     .mipmb-dropdown-item {
         .mipmb-dropdown-list {
             display: none;
@@ -108,11 +115,11 @@ a {
     }
 }
 
-//主体
+
 .mipcms-main {
     margin-top: 75px;
 }
-//首页轮播图
+
 .container .row .col-lg-8 .row .col-lg-6:nth-of-type(even) {
     padding-left: 7px;
  }
@@ -198,7 +205,7 @@ a {
         line-height: 20px;        
     }
 
-//盒子
+
 .mip-box {
     background-color: #fff;
     margin-bottom: 15px;
@@ -220,7 +227,7 @@ a {
         margin-left: 20px;
         margin-right: 20px;
         border-bottom: 1px solid #EFEFEF;
-        //选项卡
+        
         &.mip-box-tap {
             margin-bottom: -1px;
             padding: 5px 0px 0px 0px;
@@ -248,7 +255,7 @@ a {
                 }
             }
         }
-        //详情页面
+        
         .detail-title {
             margin-top: 10px;
             margin-bottom: 10px;
@@ -347,7 +354,7 @@ a {
     }
 }
 
-//详情
+
 .mipcms-detail-body {
     font-size: 16px;
     font-family: arial, sans-serif;
@@ -515,15 +522,17 @@ a {
         }
     }
     img {
-        margin: 0 5px;
         vertical-align: middle;
+        width: auto;
+        min-width: auto;
+        height: auto;
     }
 }
 
-//标签
+
 .tags li {
     padding-right: 5px;
-    float: left;
+    display: inline-block;
 }
 
 .tags a {
@@ -540,7 +549,7 @@ a {
     color: #FFF;
 }
 
-//分类列表
+
 .mipui-category-list-item {
     border-bottom: 1px solid #ddd;
     margin-bottom: 15px;
@@ -626,10 +635,13 @@ a {
         }
     }
     
-    //自适应 头部
+    
     .mipmb-header {
         .container {
             padding: 0;
+        }
+        .menu-warp {
+            float: none;
         }
          .logo-text {
             float: none;
@@ -640,6 +652,14 @@ a {
             line-height: 44px;
             border-bottom: 1px solid #242932;
         }
+        .mipmb-menu { 
+            display: block;
+        }
+        
+        .header-search-warp {
+            display: none!important;
+        }
+        
         .list-unstyled {
             overflow: hidden;
             width: 100%;
@@ -663,11 +683,11 @@ a {
             color: #ECEFF1;
         }
     }
-    //自适应 主体部分
+    
     .mipcms-main {
         margin-top: 100px;
     }
-    //自适应 上下文
+    
     .mipmb-page-item.item-up-page {
         float: none!important;
     }
@@ -679,7 +699,7 @@ a {
             margin-bottom: 5px;
         }
     }
-    //首页模块布局
+    
     .container .row .col-lg-8 .row .col-lg-6:nth-of-type(even) {
         padding-left: 15px!important;
     }
@@ -690,7 +710,7 @@ a {
 
 }
 
-//列表
+
 .li-box-list {
     line-height: 30px;
     position: relative;
@@ -748,7 +768,7 @@ a {
     color: #BABABA;
 }
 
-//空模块
+
 .no-data-block {
     height: 300px;
     padding-top: 80px;
@@ -766,8 +786,11 @@ a {
     color: #dbdbdb;
 }
 
-//重定义比例
+
 @media (min-width: 1200px) {
+    .mipmb-header-default {
+        height: 60px;
+    }
     .container {
         width: 1113px!important;
     }
@@ -793,7 +816,7 @@ a {
     padding-right: 7px;
 }
 
-//分页
+
 .pagination {
     display: inline-block;
     padding-left: 0;
@@ -869,7 +892,7 @@ a {
     cursor: not-allowed
 }
 
-//友情链接
+
 .friend-link {
     text-align: center;
     margin-bottom: 15px;

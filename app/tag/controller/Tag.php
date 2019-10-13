@@ -1,75 +1,82 @@
 <?php
-//MIPCMS.Com [Don't forget the beginner's mind]
-//Copyright (c) 2017~2099 http://MIPCMS.Com All rights reserved.
+//MIPJZ.COM [Don't forget the beginner's mind]
+//Copyright (c) 2017~2099 http://MIPJZ.COM All rights reserved.
 namespace app\tag\controller;
-use mip\Mip;
-class Tag extends Mip 
-{
 
+use app\common\controller\Base;
+
+class Tag extends Base
+{
     protected $beforeActionList = ['start'];
     public function start() {
-
+        $this->item = 'Tags';
+        $this->itemType = 'tag';
+        $this->itemName = '标签';
+        $this->itemContent = 'TagsContent';
+        $this->itemCategory = 'TagsCategory';
+        $this->itemModelNameSpace = 'app\tag\model\Tags';
+        $this->itemCategoryModelNameSpace = 'app\tag\model\TagsCategory';
+        $this->categoryListData = config('tagCategoryListData');
+        $this->categoryAllListData = config('tagCategoryListData');
     }
     public function index()
     {
-
-        return $this->mipView('tag/tag');
-    }
-    public function tagDetail()
-    {
-        $id = input('param.id');
-        $category = input('param.category');
-        $sub = input('param.sub');
         $page = input('param.page');
-        $page = $page ? $page : 1;
-        
-        $tagInfo = db($this->tags)->where('id',$id)->find();
-        if ($tagInfo) {
-            if ($tagInfo['url_name']) {
-                header('HTTP/1.1 301 Moved Permanently');
-                header('Location: ' . $this->domain .'/' . $this->mipInfo['tagModelUrl'] . '/' . $tagInfo['url_name'] .  '/');
-                exit();
-            }
-        } else {
-            $tagInfo =  db($this->tags)->where('url_name',$id)->find();
-        }
-        if (!$tagInfo) {
-            $this->error('标签不存在','/');
-        }
-        
-        //自定义变量
-        $tagInfo['category'] = $category ? $category : '';
-        $tagInfo['sub'] = $sub ? $sub : '';
-        $tagInfo['page'] = $page ? $page : '';
-        
-        //分页数量
-        $pageText = $page == 1 ? "" : $this->mipInfo['titleSeparator'] . "第" . $page . "页";
-        
-        //标题
-        $mipTitle = $tagInfo['name'] . $pageText . $this->mipInfo['titleSeparator'] . $this->mipInfo['siteName'];
-        $this->assign('mipTitle',$mipTitle);
-        
-        //关键词
-        $tagsAboutList = db($this->tags)->where('name','like','%'.$tagInfo['name'].'%')->select();
-        $tempTagsAboutList = [];
-        $tempTagsAboutInfo = $tagInfo['name'];
-        if ($tagsAboutList) {
-            foreach ($tagsAboutList as $key => $val) {
-                if ($key < 5) {
-                    $tempTagsAboutList[] = $val['name'];
+        $name = input('param.name');
+        $params = input('params');
+        $this->assign('params',$params);
+        if (!empty($params)) {
+            $params = explode('__', $params);
+            if ($params) {
+                foreach ($params as $key => $val) {
+                    if (strpos($val, '-') !== false) {
+                        $tempVal = explode('-', $val);
+                        $this->assign($tempVal[0],$tempVal[1]);
+                    }
                 }
             }
-            $tempTagsAboutInfo = implode(',', $tempTagsAboutList);
         }
-        $this->assign('mipKeywords',$tempTagsAboutInfo);
+        $page = $page ? $page : 1;
+        $id = db($this->itemCategory)->where('url_name',$name)->find()['id'];
+        if ($id) {
+            $categoryInfo = model($this->itemCategoryModelNameSpace)->getCategoryInfo($id);
+            if (!$categoryInfo) {
+                $this->error('分类不存在','');
+            }
+            $currentCid = $categoryInfo['id'];
+        } else {
+            $currentCid = 0;
+            $categoryInfo['id'] = 0;
+            $categoryInfo['name'] = $this->itemName;
+            $categoryInfo['seo_title'] = '';
+            $categoryInfo['keywords'] = '';
+            $categoryInfo['description'] = '';
+            $categoryInfo['url_name'] = $this->itemType;
+            $categoryInfo['url'] = $this->domain . '/' . $this->itemType . '/';
+        }
+        //自定义参数
+        $categoryInfo['cid'] = $categoryInfo['id'] ? $categoryInfo['id'] : '';
+        $categoryInfo['page'] = $page ? $page : '';
+        //当前分类别名
+        $this->assign('cid',$categoryInfo['id']);
+        $this->assign('page',$page);
+        $this->assign('categoryUrlName',$categoryInfo['url_name']);
         
-        //描述
-        $this->assign('mipDescription',$tagInfo['description']);
+        //分页数量
+        $pageText = $page == 1 ? "" : $this->siteInfo['titleSeparator'] . "第" . $page . "页";
         
-        $this->assign('tagInfo',$tagInfo);
+        //标题关键词描述
+        $mipTitle = $categoryInfo['seo_title'] ? $categoryInfo['seo_title'] : $categoryInfo['name'] . $pageText . $this->siteInfo['titleSeparator'] . $this->siteInfo['siteName'];
+        $this->assign('mipTitle', $mipTitle);
+        $this->assign('mipKeywords',$categoryInfo['keywords']);
+        $this->assign('mipDescription',$categoryInfo['description']);
+      
+        $this->assign('categoryInfo',$categoryInfo);
+          
+        $templateName = $categoryInfo['template'] ? $categoryInfo['template'] : $this->itemType;
+        $templateName = str_replace('.html', '', $templateName);
         
-        return $this->mipView('tag/tagDetail');
+        return $this->mipView($this->itemType. '/' .$templateName);
     }
-
 
 }

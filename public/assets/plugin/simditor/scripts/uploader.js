@@ -44,7 +44,7 @@ Uploader = (function(superClass) {
         _this.files.splice($.inArray(file, _this.files), 1);
         if (_this.queue.length > 0 && _this.files.length < _this.opts.connectionCount) {
           return _this.upload(_this.queue.shift());
-        } else {
+        } else if (_this.files.length === 0) {
           return _this.uploading = false;
         }
       };
@@ -144,11 +144,7 @@ Uploader = (function(superClass) {
       contentType: false,
       type: 'POST',
       headers: {
-        'X-File-Name': encodeURIComponent(file.name),
-        'access-key': 'cFaLOmUGoz9URROtxaAqe37vHSlI0LL3',
-        'terminal': 'pc',
-        'access-token': JSON.parse(localStorage.getItem('mip_userInfo')).accessToken[0]['access-token'],
-        'uid': JSON.parse(localStorage.getItem('mip_userInfo')).uid,
+        'X-File-Name': encodeURIComponent(file.name)
       },
       xhr: function() {
         var req;
